@@ -443,3 +443,19 @@ $wi->config->settings['wgSlackNotificationWikiUrl']['default'] = $wgServer . '/w
 // Scribunto
 $wgScribuntoEngineConf['luasandbox']['cpuLimit'] = 4;
 $wgScribuntoEngineConf['luasandbox']['maxLangCacheSize'] = 30;
+
+$wgHooks['SpecialPageBeforeExecute'][] = 'onSpecialPageBeforeExecute';
+
+function onSpecialPageBeforeExecute(SpecialPage $special, $subPage) {
+	$securePages = ['UserLogin', 'ChangeCredentials', 'Preferences']
+	$ua = $special->getRequest()->getHeader( 'User-agent' );
+	if ( preg_match( '/\b(((R|r)o|)(B|b)ot)\b/', $ua ) {
+		use MediaWiki\MediaWikiServices;
+		$services = MediaWikiServices::getInstance()
+		$canonicalName = $services->getSpecialPageFactory()->resolveAlias(  $special->getName() );
+		if in_array($canonicalName, $securePages) {
+			header('403 Forbidden - Please use the API to complete this action. If you are not a bot, contact sre[at]miraheze.org', true, 403);
+			die('ERR-403-Special-Bot');
+		}
+	}
+}
